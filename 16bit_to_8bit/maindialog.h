@@ -24,8 +24,11 @@ public slots:
     void updateListViewInput();
     void updateListViewOutput();
 
+    void start();
+
 private:
     Ui::MainDialog *ui;
+    QStringListModel *modelInput;
     QStringListModel *modelOutput;
 };
 

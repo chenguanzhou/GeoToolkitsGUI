@@ -14,12 +14,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         maindialog.cpp \
-    formimagetraninfo.cpp \
-    qimageinfomodel.cpp
+    transthread.cpp
 
 HEADERS  += maindialog.h \
-    formimagetraninfo.h \
-    qimageinfomodel.h
+    transthread.h
 
-FORMS    += maindialog.ui \
-    formimagetraninfo.ui
+FORMS    += maindialog.ui
+
+LIBS += -lgdal_i
