@@ -12,6 +12,8 @@ public:
     ~ECWDialog();
 
     void start();
+
+    void updateListViewOutput();
 };
 
 #endif // ECWDIALOG_H

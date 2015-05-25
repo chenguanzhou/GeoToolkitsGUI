@@ -77,8 +77,8 @@ void GeoDialog::updateListViewInput()
 
 void GeoDialog::updateListViewOutput()
 {
-    QStringList files = ui->lineEditInput->text().split("|");
-    QString dir = ui->lineEditOutput->text();
+    QStringList files = getOutputPathsFromLineEdit();
+    QString dir = getDirFromLineEdit();
 
     if (dir.isEmpty())
         dir = QDir::currentPath();
@@ -97,4 +97,14 @@ void GeoDialog::updateListViewOutput()
     }
 
     modelOutput->setStringList(outputFiles);
+}
+
+QStringList GeoDialog::getOutputPathsFromLineEdit()
+{
+    return ui->lineEditInput->text().split("|");
+}
+
+QString GeoDialog::getDirFromLineEdit()
+{
+    return ui->lineEditOutput->text();
 }

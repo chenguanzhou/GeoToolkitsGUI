@@ -52,27 +52,73 @@ void TransThread::run()
             GDALRasterBand *bandIn = poSrcDS->GetRasterBand(k+1);
             GDALRasterBand *bandOut = poDstDS->GetRasterBand(k+1);
 
+            bandOut->SetNoDataValue(0);
+
             double dMinMax[2] = {0.0,255.0};
             bandIn->ComputeRasterMinMax(FALSE,dMinMax);
             double dMin = dMinMax[0];
             double dMax = dMinMax[1];
-            double dDiff = dMax-dMin;
+//            double dDiff = dMax-dMin;
+            double ratio = 255./(dMax-dMin);
 
-            QVector<ushort> dataIn(width);
-            QVector<uchar> dataOut(width);
-            for (int i=0;i<height;++i)
+            //            QVector<ushort> dataIn(width);
+            //            QVector<uchar> dataOut(width);
+            //            for (int i=0;i<height;++i)
+            //            {
+            //                bandIn->RasterIO(GF_Read,0,i,width,1,&dataIn[0],width,1,GDT_UInt16,0,0);
+            //                for(int j=0;j<width;++j)
+            //                {
+            //                    if (dataIn[j]==0)
+            //                         dataOut[j] = 0;
+            //                    else
+            //                        dataOut[j] = (dataIn[j] - dMin)*255/dDiff;
+            //                }
+            //                bandOut->RasterIO(GF_Write,0,i,width,1,&dataOut[0],width,1,GDT_Byte,0,0);
+            //                if (i%100==0)
+            //                    emit progressChanged(i*100./height);
+            //            }
+
+            int nXBlocks, nYBlocks, nXBlockSize, nYBlockSize;
+            int iXBlock, iYBlock;
+            bandIn->GetBlockSize( &nXBlockSize, &nYBlockSize );
+            nXBlocks = (width + nXBlockSize - 1) / nXBlockSize;
+            nYBlocks = (height + nYBlockSize - 1) / nYBlockSize;
+            int blocksCount = nXBlocks*nYBlocks;
+            QVector<ushort> dataIn(nXBlockSize * nYBlockSize);
+            QVector<uchar> dataOut(nXBlockSize * nYBlockSize);
+            for( iYBlock = 0; iYBlock < nYBlocks; iYBlock++ )
             {
-                bandIn->RasterIO(GF_Read,0,i,width,1,&dataIn[0],width,1,GDT_UInt16,0,0);
-                for(int j=0;j<width;++j)
+                for( iXBlock = 0; iXBlock < nXBlocks; iXBlock++ )
                 {
-                    if (dataIn[j]==0)
-                         dataOut[j] = 0;
+                    int nXValid, nYValid;
+                    bandIn->ReadBlock( iXBlock, iYBlock, &dataIn[0] );
+                    if( (iXBlock+1) * nXBlockSize > width )
+                        nXValid = width - iXBlock * nXBlockSize;
                     else
-                        dataOut[j] = (dataIn[j] - dMin)*255/dDiff;
+                        nXValid = nXBlockSize;
+                    if( (iYBlock+1) * nYBlockSize > height )
+                        nYValid = height - iYBlock * nYBlockSize;
+                    else
+                        nYValid = nYBlockSize;
+
+                    // Collect the histogram counts.
+                    auto iterIn = dataIn.begin();
+                    auto iterOut = dataOut.begin();
+                    for( int iY = 0; iY < nYValid; iY++,iterIn+=nXValid,iterOut+=nXValid)
+                    {
+//                        for( int iX = 0; iX < nXValid; iX++ )
+//                        {
+//                            ushort val = dataIn[iX + iY * nXBlockSize];
+//                            dataOut[iX + iY * nXBlockSize] = val==0?0:val*ratio;
+//                        }
+                        std::transform(iterIn,iterIn+nXValid,iterOut,[=](const ushort &val)->uchar{
+                            return val==0?0:val*ratio;
+                        });
+                    }
+
+                    bandOut->WriteBlock(iXBlock, iYBlock, &dataOut[0]);
                 }
-                bandOut->RasterIO(GF_Write,0,i,width,1,&dataOut[0],width,1,GDT_Byte,0,0);
-                if (i%100==0)
-                    emit progressChanged(i*100./height);
+                emit progressChanged((iXBlock+iYBlock*nXBlocks)* 100./blocksCount);
             }
         }
 

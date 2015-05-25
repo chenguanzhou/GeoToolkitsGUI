@@ -11,8 +11,11 @@ public:
     ~ECWThread();
 
     void run();
-signals:
+    void updateProgressBar(int val);
 
+signals:
+    void progressChanged(int);
+    void progressLabelChanged(QString);
 public slots:
 
 private:

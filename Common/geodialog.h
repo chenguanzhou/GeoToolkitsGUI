@@ -28,7 +28,7 @@ public slots:
     void onPushButtonOutputBrowseClicked();
 
     void updateListViewInput();
-    void updateListViewOutput();
+    virtual void updateListViewOutput();
 
     virtual void start() = 0;
 
@@ -38,6 +38,9 @@ private:
 protected:
     QStringListModel *modelInput;
     QStringListModel *modelOutput;
+
+    QStringList getOutputPathsFromLineEdit();
+    QString     getDirFromLineEdit();
 };
 
 #endif // MAINDIALOG_H
