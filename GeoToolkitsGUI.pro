@@ -1,4 +1,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    16bit_to_8bit
+    16bit_to_8bit \
+    ECWGenerator

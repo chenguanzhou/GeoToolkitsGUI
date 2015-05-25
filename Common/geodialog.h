@@ -4,18 +4,24 @@
 #include <QDialog>
 
 namespace Ui {
-class MainDialog;
+class GeoDialog;
 }
 
 class QStringListModel;
+class QProgressBar;
+class QLabel;
 
-class MainDialog : public QDialog
+class GeoDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit MainDialog(QWidget *parent = 0);
-    ~MainDialog();
+    explicit GeoDialog(QWidget *parent = 0);
+    ~GeoDialog();
+
+protected:
+    QProgressBar *progressBar();
+    QLabel *progressLabel();
 
 public slots:
     void onPushButtonInputBrowseClicked();
@@ -24,10 +30,12 @@ public slots:
     void updateListViewInput();
     void updateListViewOutput();
 
-    void start();
+    virtual void start() = 0;
 
 private:
-    Ui::MainDialog *ui;
+    Ui::GeoDialog *ui;
+
+protected:
     QStringListModel *modelInput;
     QStringListModel *modelOutput;
 };

@@ -1,14 +1,13 @@
-#include "maindialog.h"
-#include "ui_maindialog.h"
+#include "geodialog.h"
+#include "ui_geodialog.h"
 
 #include <QtCore>
 #include <QStringListModel>
 #include <QFileDialog>
-#include "transthread.h"
 
-MainDialog::MainDialog(QWidget *parent) :
+GeoDialog::GeoDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::MainDialog),
+    ui(new Ui::GeoDialog),
     modelInput(new QStringListModel(this)),
     modelOutput(new QStringListModel(this))
 {
@@ -28,12 +27,22 @@ MainDialog::MainDialog(QWidget *parent) :
     connect(ui->pushButtonStart,SIGNAL(clicked()),SLOT(start()));
 }
 
-MainDialog::~MainDialog()
+GeoDialog::~GeoDialog()
 {
     delete ui;
 }
 
-void MainDialog::onPushButtonInputBrowseClicked()
+QProgressBar *GeoDialog::progressBar()
+{
+    return ui->progressBar;
+}
+
+QLabel *GeoDialog::progressLabel()
+{
+    return ui->labelProgress;
+}
+
+void GeoDialog::onPushButtonInputBrowseClicked()
 {
     QStringList files = QFileDialog::getOpenFileNames(
                 this,
@@ -47,7 +56,7 @@ void MainDialog::onPushButtonInputBrowseClicked()
     ui->lineEditInput->setText(files.join("|"));
 }
 
-void MainDialog::onPushButtonOutputBrowseClicked()
+void GeoDialog::onPushButtonOutputBrowseClicked()
 {
     QString dir = QFileDialog::getExistingDirectory(
                 this,
@@ -60,13 +69,13 @@ void MainDialog::onPushButtonOutputBrowseClicked()
     ui->lineEditOutput->setText(dir);
 }
 
-void MainDialog::updateListViewInput()
+void GeoDialog::updateListViewInput()
 {
     QStringList files = ui->lineEditInput->text().split("|");
     modelInput->setStringList(files);
 }
 
-void MainDialog::updateListViewOutput()
+void GeoDialog::updateListViewOutput()
 {
     QStringList files = ui->lineEditInput->text().split("|");
     QString dir = ui->lineEditOutput->text();
@@ -88,30 +97,4 @@ void MainDialog::updateListViewOutput()
     }
 
     modelOutput->setStringList(outputFiles);
-}
-
-void MainDialog::start()
-{
-    QStringList inputList = modelInput->stringList();
-    QStringList outputList = modelOutput->stringList();
-
-    int count = inputList.count();
-    if (count == 0 || count != outputList.count())
-        return;
-
-    TransThread *tFirst = new TransThread(inputList[0],outputList[0],this);
-    connect(tFirst,SIGNAL(progressChanged(int)),ui->progressBar,SLOT(setValue(int)));
-    connect(tFirst,SIGNAL(progressLabelChanged(QString)),ui->labelProgress,SLOT(setText(QString)));
-
-    TransThread *tLast = tFirst;
-    for (int i=1;i<count;++i)
-    {
-        TransThread *tNew = new TransThread(inputList[i],outputList[i],this);
-        connect(tNew,SIGNAL(progressChanged(int)),ui->progressBar,SLOT(setValue(int)));
-        connect(tNew,SIGNAL(progressLabelChanged(QString)),ui->labelProgress,SLOT(setText(QString)));
-        connect(tLast,SIGNAL(finished()),tNew,SLOT(start()));
-        tLast = tNew;
-    }
-
-    tFirst->start();
 }

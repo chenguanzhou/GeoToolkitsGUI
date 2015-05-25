@@ -13,12 +13,16 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        maindialog.cpp \
-    transthread.cpp
+    transthread.cpp \
+    ../Common/geodialog.cpp \
+    translatedialog.cpp
 
-HEADERS  += maindialog.h \
-    transthread.h
+HEADERS  += \
+    transthread.h \
+    ../Common/geodialog.h \
+    translatedialog.h
 
-FORMS    += maindialog.ui
+FORMS    += \
+    ../Common/geodialog.ui
 
 LIBS += -lgdal_i

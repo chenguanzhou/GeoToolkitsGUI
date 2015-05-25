@@ -1,11 +1,11 @@
-#include "translatedialog.h"
+#include "ecwdialog.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    TranslateDialog w;
-    w.setWindowTitle(TranslateDialog::tr("16bit to 8bit convertor"));
+    ECWDialog w;
+    w.setWindowTitle(ECWDialog::tr("ECW Generator"));
     w.show();
 
     return a.exec();
